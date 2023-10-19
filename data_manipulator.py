@@ -2,8 +2,7 @@ import pandas as pd
 import random
 import numpy as np
 from datasets import load_dataset
-from typing import List
-from math import nan
+from typing import List, Tuple
 
 class DataManipulator:
     def __init__(self, seed: int=7) -> None:
@@ -12,7 +11,8 @@ class DataManipulator:
         self.gpt_contexts_and_qs = None
         random.seed(seed)
 
-    def produce_training_data(self) -> List[tuple]:
+
+    def produce_training_data(self) -> Tuple[list]:
         df = self.sciq_dataset.to_pandas()
         df.drop(columns=['distractor3', 'distractor1', 'distractor2', 'correct_answer'], inplace=True)
         df.replace('', np.nan, inplace=True)
@@ -25,18 +25,18 @@ class DataManipulator:
         self.gpt_contexts = new_sci_c[:250]
 
         # Data for further fine-tuning the bi-encoder (first 250 contexts reserved)
-        train_q_a = [{'context': context, 'question': question} 
+        train_q_c = [{'context': context, 'question': question} 
                      for context, question in list(zip(new_sci_c[250:2750], new_sci_q[250:2750]))]
         
         # Shuffling data just to ensure that any potential order is broken
-        random.shuffle(train_q_a)
+        random.shuffle(train_q_c)
 
-        # Creating 'bad' (or rather neutral) and 'good' samples
+        # Creating 'bad' (or rather neutral) and 'good' training samples
         good_training_data = []
         bad_training_data = []
 
         last_sample = None
-        for sample in train_q_a:
+        for sample in train_q_c:
             if last_sample and sample['context'] != last_sample['context']:
                 # For question that don't align to contexts, the cosine-similarity should be 0.0 
                 bad_training_data.append((sample['question'], last_sample['context'], 0.0))

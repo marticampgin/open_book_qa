@@ -1,28 +1,56 @@
-from transformers import pipeline
-from data_manipulator import DataManipulator
-from data_trainer import Datatrainer
-from sentence_transformers import SentenceTransformer
-def main():
+import pandas as pd
 
+from transformers import pipeline
+from data_trainer import Datatrainer
+from data_manipulator import DataManipulator
+from sentence_transformers import SentenceTransformer, util
+
+
+def start_training() -> None:
+    data_trainer = Datatrainer()
+    data_trainer.train()
+    
+
+def test() -> None:
+    # Init QA-model
     qa_model = pipeline('question-answering',
                         model='deepset/roberta-base-squad2',
                         tokenizer='deepset/roberta-base-squad2',
                         max_length=15)
     
-    data_manipulator = DataManipulator()
-    training_data = data_manipulator.produce_training_data()
+    finetuned_bi_encoder = SentenceTransformer('information_retrieval/results')  # Load fine-tuned bi_encoder
 
-    data_manipulator.csv_to_contexts()
+    # Some data for testing
+    dm = DataManipulator()
+    dataset = dm.sciq_dataset.to_pandas()
+    docs = dataset['support'][:-50].tolist()  # Last contexts 50 haven't been used in training
+    questions = dataset['question'][:-5].tolist()  # Last 5 questions 
 
-    gpt_contexts_questions = data_manipulator.get_gpt_contexts_and_qs()
-    train_data_combined = data_manipulator.combine_gpt_and_training_data(gpt_contexts_questions, training_data)
-  
-    data_trainer = Datatrainer(train_data_combined)
-    data_trainer.train()
+    # Encode all docs. and one of the questions
+    document_embeddings = finetuned_bi_encoder.encode(docs, convert_to_tensor=True, show_progress_bar=True)
+    question_1_embedding = finetuned_bi_encoder.encode(questions[0], convert_to_tensor=True)
     
-    finetuned_bi_encoder = SentenceTransformer('information_retrieval/results')
-
+    hits = util.semantic_search(question_1_embedding, document_embeddings, top_k=3)[0]  # Extracting top 3 hits
     
+
+    # SHOULD RUN THROUGHT A LOOP FOR ALL examples
+    # UPLOAD MODEL TO HUGGINGFACE, THEN CREATE AN APP.py WITH INTERFACE TO BASICALLY DO THE SAME
+    # ALSO CREATE REQUIREMENTS
+
+    # Print question, top 3 hits
+    print(f'Question: {questions[0]}\n')
+    for i, hit in enumerate(hits):
+        print(f'Document {i + 1} cos_sim {hit["score"]:.2f}:\n\n{docs[hit["corpus_id"]]}')
+        print('\n')
+
+    # Run the question and the top 1 hit through the QA-model
+    print(f'Answer from Top Document: {qa_model(questions[0], str(docs[hits[0]["corpus_id"]]))}')
+        
+
+def main() -> None:
+    # Uncomment for fine-tuning
+    # start_training()
+    test()
 
 
 if __name__ == '__main__':

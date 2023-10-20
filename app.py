@@ -73,11 +73,9 @@ def main() -> None:
                                         args=(scientific_question, context))
                     
                 if q_button:
-                    print('suka')
                     with open('ans.txt', 'r') as ans_file:
                         answer = ans_file.read()
                     st.write(f'Answer: {answer}')
-                    print('sukla')
 
 
 if __name__  == "__main__":

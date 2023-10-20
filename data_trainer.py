@@ -57,7 +57,7 @@ class Datatrainer:
         train_examples = [InputExample(texts=sample[:2], label=sample[2]) for sample in train_data[:num_training_samples]]
         train_dataloader = DataLoader(train_examples, batch_size=self.batch_size)  # Initiating pytorch-dataloader
 
-        sent1, sent2, scores = zip(train_data[num_training_samples:])
+        sent1, sent2, scores = zip(*train_data[num_training_samples:])
         evaluator =  evaluation.EmbeddingSimilarityEvaluator(sent1, sent2, scores)  # Initiating the evaluator
 
         print(f"Embeddings similarity before training: {self.bi_encoder.evaluate(evaluator)}")

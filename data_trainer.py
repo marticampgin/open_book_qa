@@ -15,12 +15,12 @@ class Datatrainer:
     Simply made for modularity and easier reading. 
     """
     def __init__(self,
-                 epochs: int=3,
-                 train_data_ratio: float=0.8,
-                 batch_size: int=64,
-                 bi_encoder: str='msmarco-distilbert-cos-v5',
-                 max_seq_len: int=128,
-                 output_path: str='information_retrieval/results') -> None:
+                 epochs : int=3,
+                 train_data_ratio : float=0.8,
+                 batch_size : int=64,
+                 bi_encoder : str='msmarco-distilbert-cos-v5',
+                 max_seq_len : int=128,
+                 output_path : str='information_retrieval/results') -> None:
         
         # Init all the parameters
         self.bi_encoder = SentenceTransformer(bi_encoder)

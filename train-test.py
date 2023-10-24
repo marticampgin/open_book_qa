@@ -6,6 +6,9 @@ from data_manipulator import DataManipulator
 from sentence_transformers import SentenceTransformer, util
 
 
+# SCRIPT FOR TESTING PURPOSES
+
+
 def start_training() -> None:
     """
     Start training.
@@ -30,8 +33,8 @@ def test() -> None:
     # Some data for testing
     dm = DataManipulator()
     dataset = dm.sciq_dataset.to_pandas()
-    docs = dataset['support'][:-50].tolist()  # Last contexts 50 haven't been used in training
-    questions = dataset['question'][:-5].tolist()  # Last 5 questions 
+    docs = dataset['support'][:-50].tolist()  # Last 50 contexts haven't been used in training
+    questions = dataset['question'][:-1].tolist()  # Last question
 
     # Encode all docs. and one of the questions
     document_embeddings = finetuned_bi_encoder.encode(docs, convert_to_tensor=True, show_progress_bar=True)
@@ -39,9 +42,6 @@ def test() -> None:
     
     hits = util.semantic_search(question_1_embedding, document_embeddings, top_k=3)[0]  # Extracting top 3 hits
     
-    # UPLOAD MODEL TO HUGGINGFACE, THEN CREATE AN APP.py WITH INTERFACE TO BASICALLY DO THE SAME
-    # ALSO CREATE REQUIREMENTS
-
     # Print question, top 3 hits
     print(f'Question: {questions[0]}\n')
     for i, hit in enumerate(hits):

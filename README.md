@@ -9,3 +9,10 @@ Streamlit UI for more user-friendly usage.
 pip install -r requirements.txt
 streamlit run app.py
 ```
+### How it is working: 
+The dataset used for the project contained scientific questions, contexts, and respective answers (https://huggingface.co/datasets/sciq).
+
+Moreover, I simulated a 'lack of data' by taking out a portion of contexts without their questions. This was done in order to try and
+generate more data using gpt-3.5-turbo model from OpenAI, by sending inputs in bulk utilizing Relevance AI (https://relevanceai.com/).
+
+![alt text](https://github.com/marticampgin/open_book_qa/blob/main/rel_img/prompt.png)
